@@ -44,6 +44,11 @@ trait DocsService extends Config with Protocols {
     }
   }
 
+  def fetchDocs(user: String, group: Option[String], params: Map[String, String])
+  : Future[List[CurriDocument]]= {
+    Repository.findDocs(user, group).map(l => l.map(CurriDocumentReader.read(_)))
+  }
+
   def fetchDoc(user: Option[String], group: Option[String], id: String, params: Map[String, String])
   : Future[Either[String, List[CurriDocument]]] = {
     Future {
@@ -56,24 +61,29 @@ trait DocsService extends Config with Protocols {
       pathPrefix("docs") {
         parameterMap { params =>
           optionalHeaderValueByName("x-curri-user") { user =>
-            optionalHeaderValueByName("x-curri-group") { group =>
-              pathEndOrSingleSlash {
-                get {
-                  complete {
-                    fetchDocs(user, group, params)
-                  }
-                } ~
-                  (get & path(Segment)) { docId => {
-                    complete {
-                      fetchDoc(user, group, docId, params).map[ToResponseMarshallable] {
-                        case Right(doc) => doc
-                        case Left(errorMessage) => BadRequest -> errorMessage
+            user match {
+              case Some(u) =>
+                optionalHeaderValueByName("x-curri-group") { group =>
+                  pathEndOrSingleSlash {
+                    get {
+                      complete {
+                        fetchDocs(u, group, params)
                       }
-                    }
+                    } ~
+                      (get & path(Segment)) { docId => {
+                        complete {
+                          fetchDoc(user, group, docId, params).map[ToResponseMarshallable] {
+                            case Right(doc) => doc
+                            case Left(errorMessage) => BadRequest -> errorMessage
+                          }
+                        }
+                      }
+                      }
                   }
-                  }
-              }
+                }
+              case None => throw new IllegalArgumentException("User is mandatory")
             }
+
           }
         }
       }
