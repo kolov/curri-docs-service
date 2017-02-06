@@ -1,6 +1,6 @@
 package curri
 
-import akka.http.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats
 import reactivemongo.bson.BSONDocument

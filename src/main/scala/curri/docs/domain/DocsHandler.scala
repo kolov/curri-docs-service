@@ -1,7 +1,7 @@
 package curri.docs.domain
 
-import akka.http.model.HttpMethods.GET
-import akka.http.model._
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import curri.Utils
 import curri.Utils.convertToString
 import curri.db.Repository

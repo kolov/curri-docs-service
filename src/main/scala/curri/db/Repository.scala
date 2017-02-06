@@ -21,7 +21,7 @@ object Repository extends Config {
   def connect(name: String): BSONCollection = {
 
     val driver = new MongoDriver
-    val connection = driver.connection(List(mongoHost)
+    val connection = driver.connection(List(mongoHost))
 
     val db = connection(mongoDB)
     db.collection(name)
