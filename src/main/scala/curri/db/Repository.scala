@@ -1,6 +1,7 @@
 package curri.db
 
 
+import curri.Config
 import curri.docs.domain.{CurriDocument, CurriDocumentWriter}
 import reactivemongo.api._
 import reactivemongo.api.collections.default.BSONCollection
@@ -13,16 +14,16 @@ import scala.concurrent.Future
 /**
   * Access to the Mongodb repository
   */
-object Repository {
+object Repository extends Config {
 
   val collectionDocs = connect("docs")
 
   def connect(name: String): BSONCollection = {
 
     val driver = new MongoDriver
-    val connection = driver.connection(List("localhost"))
+    val connection = driver.connection(List(mongoHost)
 
-    val db = connection("curri")
+    val db = connection(mongoDB)
     db.collection(name)
   }
 

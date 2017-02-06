@@ -4,6 +4,7 @@ import akka.http.model._
 import akka.stream.FlowMaterializer
 import akka.stream.scaladsl.FlowGraphImplicits._
 import akka.stream.scaladsl.{Flow, _}
+import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, DocsHandler}
 import reactivemongo.core.commands.LastError
@@ -16,7 +17,7 @@ import scala.concurrent.duration._
   * Simple Object that starts an HTTP server using akka-http. All requests are handled
   * through an Akka flow.
   */
-object DocsService extends App {
+object DocsService extends App with Config {
 
   // the actor system to use. Required for flowmaterializer and HTTP.
   // passed in implicit
@@ -24,8 +25,8 @@ object DocsService extends App {
   implicit val materializer = FlowMaterializer()
 
   // start the server on the specified interface and port.
-  val serverBinding = Http().bind(interface = "localhost", port = 8091)
-  val serverBinding2 = Http().bind(interface = "localhost", port = 8092)
+  val serverBinding = Http().bind(interface = httpHost, port = httpPort)
+  val serverBinding2 = Http().bind(interface = httpHost, port = httpPort + 1)
 
   // helper actor for some logging
   val idActor = system.actorOf(Props[IDActor], "idActor");
@@ -50,7 +51,7 @@ object DocsService extends App {
   // Handles port 8090
   serverBinding2.connections.foreach { connection =>
     connection.handleWith(broadCastMergeFlow)
-    //    idActor ! "start"
+    idActor ! "start"
   }
 
   // Handles port 8091
@@ -66,8 +67,7 @@ object DocsService extends App {
         }
       }
     }))
-
-    //    idActor ! "start"
+    idActor ! "start"
   }
 
   def docFromRequest(request: HttpRequest): Future[CurriDocument] =
