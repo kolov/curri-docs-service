@@ -7,7 +7,9 @@ case class CurriDocument(
                           title: String,
                           body: String,
                           ownerUser: Option[String],
-                          ownerGroup: Option[String])
+                          ownerGroup: Option[String]) {
+  require(ownerUser.isDefined || ownerGroup.isDefined)
+}
 
 
 object CurriDocumentWriter extends BSONDocumentWriter[CurriDocument] {
@@ -16,8 +18,6 @@ object CurriDocumentWriter extends BSONDocumentWriter[CurriDocument] {
     "body" -> curriDoc.body,
     "ownerUser" -> curriDoc.ownerUser,
     "ownerGroup" -> curriDoc.ownerGroup)
-
-
 }
 
 

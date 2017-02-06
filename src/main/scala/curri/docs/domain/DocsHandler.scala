@@ -1,7 +1,6 @@
 package curri.docs.domain
 
 import akka.http.model.HttpMethods.GET
-import akka.http.model.Uri.Query
 import akka.http.model._
 import curri.Utils
 import curri.Utils.convertToString
@@ -13,9 +12,9 @@ import scala.concurrent.Future
 
 object DocsHandler {
 
-  def returnDocs(user: String, hroup: Option[String]): Future[HttpResponse] = {
+  def returnDocs(user: String, group: Option[String]): Future[HttpResponse] = {
     for {
-      input <- Repository.findDocs
+      input <- Repository.findDocs(user, group)
     } yield {
       HttpResponse(entity = convertToString(input))
     }
@@ -36,13 +35,13 @@ object DocsHandler {
           case Some(userHeader) =>
             returnDocs(userHeader.value(),
               request.headers.filter(_.is("x-curri-group")).headOption.map(_.name))
-          case None => Utils.Responses.NOT_FOUND
+          case None => Utils.Responses.BAD_REQUEST
         }
       }
 
-
       // Simple case that matches everything, just return a not found
-      case HttpRequest(_, _, _, _, _) => Utils.Responses.NOT_FOUND
+      case HttpRequest(_, _, _, _, _)
+      => Utils.Responses.NOT_FOUND
     }
   }
 }
