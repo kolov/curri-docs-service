@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
-import curri.http.{AppErrors, HttpException}
+import curri.http.{Api, AppErrors, HttpException}
 import reactivemongo.core.commands.LastError
 import spray.json.DefaultJsonProtocol
 
@@ -51,10 +51,9 @@ trait DocsService extends Config with Protocols {
 
   val exceptionHandler = ExceptionHandler {
     case e: HttpException =>
-      extractUri { uri =>
-        println(s"Request to $uri could not be handled normally")
         complete(HttpResponse(status = e.code, entity = e.msg))
-      }
+    case e: Exception =>
+        complete(HttpResponse(status = StatusCodes.InternalServerError, entity = e.getMessage))
   }
 
 
@@ -63,11 +62,11 @@ trait DocsService extends Config with Protocols {
       handleExceptions(exceptionHandler) {
         pathPrefix("docs") {
           parameterMap { params =>
-            optionalHeaderValueByName("x-curri-user") { user =>
+            optionalHeaderValueByName(Api.HEADER_USER) { user =>
               user match {
                 case None => throw AppErrors.noUser
                 case Some(u) =>
-                  optionalHeaderValueByName("x-curri-group") { group =>
+                  optionalHeaderValueByName(Api.HEADER_GROUP) { group =>
                     pathEndOrSingleSlash {
                       get {
                         complete {
@@ -81,6 +80,7 @@ trait DocsService extends Config with Protocols {
                               case Left(errorMessage) => BadRequest -> errorMessage
                             }
                           }
+                        }
                         }
                         }
                     }
