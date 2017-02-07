@@ -51,9 +51,9 @@ trait DocsService extends Config with Protocols {
 
   val exceptionHandler = ExceptionHandler {
     case e: HttpException =>
-        complete(HttpResponse(status = e.code, entity = e.msg))
+      complete(HttpResponse(status = e.code, entity = e.msg))
     case e: Exception =>
-        complete(HttpResponse(status = StatusCodes.InternalServerError, entity = e.getMessage))
+      complete(HttpResponse(status = StatusCodes.InternalServerError, entity = e.getMessage))
   }
 
 
@@ -69,11 +69,7 @@ trait DocsService extends Config with Protocols {
                   optionalHeaderValueByName(Api.HEADER_GROUP) { group =>
                     pathEndOrSingleSlash {
                       get {
-                        complete {
-                          fetchDocs(u, group, params)
-                        }
-                      } ~
-                        (get & path(Segment)) { docId => {
+                        path(Segment) { docId => {
                           complete {
                             fetchDoc(user, group, docId, params).map[ToResponseMarshallable] {
                               case Right(doc) => doc
@@ -82,10 +78,20 @@ trait DocsService extends Config with Protocols {
                           }
                         }
                         }
+                        complete {
+                          fetchDocs(u, group, params)
                         }
+
+                      } ~ post {
+                        entity(as[CurriDocument]) { doc => {
+                          complete {
+                            doc
+                          }
+                        }
+                        }
+                      }
                     }
                   }
-
               }
             }
           }
