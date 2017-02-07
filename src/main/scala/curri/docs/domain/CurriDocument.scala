@@ -8,7 +8,6 @@ case class CurriDocument(
                           body: String,
                           ownerUser: Option[String],
                           ownerGroup: Option[String]) {
-  // require(ownerUser.isDefined || ownerGroup.isDefined)
 
 }
 

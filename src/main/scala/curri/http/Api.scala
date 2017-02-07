@@ -5,5 +5,5 @@ package curri.http
   */
 object Api {
 val HEADER_USER = "x-curri-user"
-val HEADER_GROUP = "x-curri-group"
+val HEADER_GROUPS = "x-curri-group"
 }

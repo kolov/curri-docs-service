@@ -9,12 +9,14 @@ import curri.db.Repository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
+/**
+  * Handler for async, alternative to routes
+  */
 object DocsHandler {
 
-  def returnDocs(user: String, group: Option[String]): Future[HttpResponse] = {
+  def returnDocs(user: String, maybeGroups: Option[Seq[String]]): Future[HttpResponse] = {
     for {
-      input <- Repository.findDocs(user, group)
+      input <- Repository.findDocs(user, maybeGroups)
     } yield {
       HttpResponse(entity = convertToString(input))
     }
@@ -34,7 +36,7 @@ object DocsHandler {
         request.headers.filter(_.is("x-curri-user")).headOption match {
           case Some(userHeader) =>
             returnDocs(userHeader.value(),
-              request.headers.filter(_.is("x-curri-group")).headOption.map(_.name))
+              request.headers.filter(_.is("x-curri-group")).headOption.map(_.name).map(_.split(",")))
           case None => Utils.Responses.BAD_REQUEST
         }
       }

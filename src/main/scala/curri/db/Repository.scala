@@ -27,33 +27,34 @@ object Repository extends Config {
     db.collection(name)
   }
 
-  def findDocs(user: String, group: Option[String]): Future[List[BSONDocument]] = {
+  def findDocs(user: String, maybeGroups: Option[Seq[String]]): Future[List[BSONDocument]] = {
+    // find all documents owned by either user ot group
+    val docsByUser = collectionDocs.find(makeDoc(user, maybeGroups)).cursor[BSONDocument].collect[List]()
+    docsByUser
+  }
+
+  def findDoc(user: String, maybeGroups: Option[Seq[String]], id: String): Future[BSONDocument] = {
     // which results in a Future[List[BSONDocument]]
+
+    val query = BSONDocument("age" -> BSONDocument("$gt" -> 27))
+
     collectionDocs
-      .find(makeDoc(user, group))
+      .find(makeDoc(user, maybeGroups))
       .cursor[BSONDocument]
-      .collect[List]()
+      .collect[List]().map(_.head)
   }
 
 
-  private def makeDoc(user: String, group: Option[String]) = {
-    group match {
-      case Some(group) => BSONDocument("ownerUser" -> user, "ownerGroup" -> group)
-      case None => BSONDocument("ownerUser" -> user)
+  private def makeDoc(user: String, maybeGroups: Option[Seq[String]]) = {
+
+    val queryGroups = maybeGroups match {
+      case Some(groups) => Some(BSONDocument("$in" -> groups))
+      case None => None
     }
-  }
-
-  def save(user: Option[String], group: Option[String], title: String, body: String)
-  : Future[LastError] = {
-
-    val doc = BSONDocument("title" -> title,
-      "body" -> body,
-      "user" -> user,
-      "group" -> group)
-    // which results in a Future[List[BSONDocument]]
-
-    collectionDocs
-      .save(doc)
+    BSONDocument(
+      "ownerUser" -> user,
+      "ownerGroup" -> queryGroups
+    )
   }
 
   def save(curriDocument: CurriDocument): Future[LastError] = {

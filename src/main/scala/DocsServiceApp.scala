@@ -33,19 +33,32 @@ trait DocsService extends Config with Protocols {
   implicit val materializer = ActorMaterializer()
 
 
-  def saveDoc(doc: CurriDocument): Future[LastError] =
-    Repository.save(doc)
-
-  def fetchDocs(user: String, group: Option[String], params: Map[String, String])
-  : Future[List[CurriDocument]] = {
-    Repository.findDocs(user, group).map(l => l.map(CurriDocumentReader.read(_)))
+  def saveDoc(user: String, maybeGroups: Option[Seq[String]], doc: CurriDocument): Future[HttpResponse] = {
+    // if user or group are present in document, they must match the
+    // user/groups from request
+    doc.ownerUser match {
+      case Some(ownerUser) => if (ownerUser != user)
+        throw AppErrors.forbidden("User in doc doesn't match user in " + "request")
+      case None => if (!doc.ownerGroup.isDefined)
+        throw AppErrors.badRequest("Either user or group must be defined in request")
+    }
+    doc.ownerGroup match {
+      case Some(group) => if (!maybeGroups.getOrElse(List()).contains(group))
+        throw AppErrors.forbidden("Group in doc doesn't match groups in request")
+      case None =>
+    }
+    Repository.save(doc).map( le => HttpResponse(status = if(le.ok) StatusCodes.OK else StatusCodes
+      .InternalServerError))
   }
 
-  def fetchDoc(user: Option[String], group: Option[String], id: String, params: Map[String, String])
-  : Future[Either[String, List[CurriDocument]]] = {
-    Future {
-      Right(List(CurriDocument.apply("title", "body", Some("x"), None)))
-    }
+  def fetchDocs(user: String, maybeGroups: Option[Seq[String]], params: Map[String, String])
+  : Future[List[CurriDocument]] = {
+    Repository.findDocs(user, maybeGroups).map(l => l.map(CurriDocumentReader.read(_)))
+  }
+
+  def fetchDoc(user: String, maybeGroups: Option[Seq[String]], id: String, params: Map[String, String])
+  : Future[CurriDocument] = {
+    Repository.findDoc(user, maybeGroups, id).map(CurriDocumentReader.read(_))
   }
 
 
@@ -62,35 +75,33 @@ trait DocsService extends Config with Protocols {
       handleExceptions(exceptionHandler) {
         pathPrefix("docs") {
           parameterMap { params =>
-            optionalHeaderValueByName(Api.HEADER_USER) { user =>
-              user match {
-                case None => throw AppErrors.noUser
-                case Some(u) =>
-                  optionalHeaderValueByName(Api.HEADER_GROUP) { group =>
+            optionalHeaderValueByName(Api.HEADER_USER) { maybeUser =>
+              maybeUser match {
+                case None => throw AppErrors.unauthorized
+                case Some(user) =>
+                  optionalHeaderValueByName(Api.HEADER_GROUPS) { group => {
+                    val maybeGroups: Option[Seq[String]] = group.map(_.split(","))
                     pathEndOrSingleSlash {
                       get {
                         path(Segment) { docId => {
                           complete {
-                            fetchDoc(user, group, docId, params).map[ToResponseMarshallable] {
-                              case Right(doc) => doc
-                              case Left(errorMessage) => BadRequest -> errorMessage
-                            }
+                            fetchDoc(user, maybeGroups, docId, params)
                           }
                         }
                         }
                         complete {
-                          fetchDocs(u, group, params)
+                          fetchDocs(user, maybeGroups, params)
                         }
-
                       } ~ post {
                         entity(as[CurriDocument]) { doc => {
                           complete {
-                            doc
+                            saveDoc(user, maybeGroups, doc) // eventual group will be part of doc request
                           }
                         }
                         }
                       }
                     }
+                  }
                   }
               }
             }
