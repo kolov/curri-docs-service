@@ -22,6 +22,7 @@ libraryDependencies ++= {
     "com.typesafe.play" % "play-json_2.11" % "2.4.0-M2",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
 
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
   )
 }

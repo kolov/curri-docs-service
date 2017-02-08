@@ -10,7 +10,6 @@ import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
 import curri.http.{Api, AppErrors, HttpException}
-import reactivemongo.bson.BSONDocument
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,14 +20,8 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ipDocFormat = jsonFormat4(CurriDocument.apply)
 }
 
-/**
-  * Simple Object that starts an HTTP server using akka-http. All requests are handled
-  * through an Akka flow.
-  */
 trait DocsService extends Config with Protocols {
 
-  implicit val system = ActorSystem("Streams")
-  implicit val materializer = ActorMaterializer()
 
 
   def saveDoc(user: String, maybeGroups: Option[Seq[String]], doc: CurriDocument): Future[String] = {
@@ -115,11 +108,12 @@ trait DocsService extends Config with Protocols {
 
 object DocsServiceApp extends App with DocsService with Config {
 
+  implicit val system = ActorSystem("Streams")
+  implicit val materializer = ActorMaterializer()
 
   // helper actor for some logging
   val idActor = system.actorOf(Props[IDActor], "idActor");
   idActor ! "start"
-
 
   val logger = Logging(system, getClass)
 
