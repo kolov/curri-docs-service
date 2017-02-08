@@ -5,6 +5,11 @@ https://github.com/kolov/curriculi.
 
 The implementation is based on akka-http and reactivemongo.
  
+ # Status
+
+ [![Build Status](https://travis-ci.org/kolov/curri-docs-service.svg?branch=master)](https://travis-ci.org/kolov/curri-docs-service)
+
+ 
 ## API
 
 This service is not intended to be client-facing, it will be only accessible by an edge service 
@@ -19,7 +24,7 @@ All `GET` verbs returning document accept parameter `fields`, indication which f
 * `POST /docs` - save new document from body, returns id
 * `PUT /docs/{id}` - update document
 
-#### References
+## References
 
 I have used the following resources to get started:
 
