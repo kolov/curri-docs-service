@@ -1,23 +1,22 @@
 # Akka HTTP - MongoDB microservice 
 
-Microservice managing access to documents in a MongoDB database. This is one of the mocroservices used by
+A service managing access to documents in a MongoDB database. This is one of the microservices used by
 https://github.com/kolov/curriculi.
 
-The implementation is based on akka-http, reactivemongo.
+The implementation is based on akka-http and reactivemongo.
  
 ## API
 
 This service is not intended to be client-facing, it will be only accessible by an edge service 
 providing headers `x-curri-user` and `x-curri-group` based on the user authentication. The following resources are 
-availabel:
+available:
 
 * `GET /docs` - get all documents visible by user/group
-* `GET /docs/{id}` - get a document by id, must be visible
-* `GET /types` - returns all doc types
+* `GET /docs/{id}` - get a document by id, must be visible 
 
 All `GET` verbs returning document accept parameter `fields`, indication which fileds to return
 
-* `POST /docs` - save new document, returns id
+* `POST /docs` - save new document from body, returns id
 * `PUT /docs/{id}` - update document
 
 #### References
