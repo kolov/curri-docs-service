@@ -35,13 +35,13 @@ object Repository extends Config {
     docsByUser
   }
 
-  def findDoc(user: String, maybeGroups: Option[Seq[String]], id: String): Future[BSONDocument] = {
+  def findDoc(user: String, maybeGroups: Option[Seq[String]], id: String): Future[Option[BSONDocument]] = {
 
     collectionDocs
-      // .find(makeDoc(user, maybeGroups).add(BSONDocument("_id" -> BSONObjectID(id))))
-      .find(BSONDocument("_id" -> BSONObjectID(id)))
+       .find(makeDoc(user, maybeGroups).add(BSONDocument("_id" -> BSONObjectID(id))))
+      //.find(BSONDocument("_id" -> BSONObjectID(id)))
       .cursor[BSONDocument]
-      .collect[List]().map(_.head)
+      .collect[List]().map(_.headOption)
   }
 
 

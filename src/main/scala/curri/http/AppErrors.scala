@@ -7,6 +7,7 @@ case class HttpException(code: StatusCode, msg: String) extends Exception
 object AppErrors {
 
   val unauthorized = HttpException(StatusCodes.Unauthorized, "User is mandatory")
+  val notFound = HttpException(StatusCodes.NotFound, "")
 
   def forbidden(msg: String) = HttpException(StatusCodes.Forbidden, msg)
 

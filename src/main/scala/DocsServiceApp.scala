@@ -10,6 +10,7 @@ import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
 import curri.http.{Api, AppErrors, HttpException}
+import reactivemongo.bson.BSONDocument
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,7 +55,10 @@ trait DocsService extends Config with Protocols {
 
   def fetchDoc(user: String, maybeGroups: Option[Seq[String]], id: String, params: Map[String, String])
   : Future[CurriDocument] = {
-    Repository.findDoc(user, maybeGroups, id).map(CurriDocumentReader.read(_))
+    Repository.findDoc(user, maybeGroups, id).map(_ match {
+      case Some(doc) => CurriDocumentReader.read(doc)
+      case None => throw AppErrors.notFound
+    })
   }
 
 
