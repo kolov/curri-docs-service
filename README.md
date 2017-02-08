@@ -5,7 +5,7 @@ https://github.com/kolov/curriculi.
 
 The implementation is based on akka-http and reactivemongo.
  
- # Status
+# Status
 
  [![Build Status](https://travis-ci.org/kolov/curri-docs-service.svg?branch=master)](https://travis-ci.org/kolov/curri-docs-service)
 
