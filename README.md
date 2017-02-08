@@ -11,12 +11,13 @@ This service is not intended to be client-facing, it will be only accessible by 
 providing headers `x-curri-user` and `x-curri-group` based on the user authentication. The following resources are 
 availabel:
 
-* `GET /docs` - get all documents
-* `GET /docs/{id}` - get a document by id 
+* `GET /docs` - get all documents visible by user/group
+* `GET /docs/{id}` - get a document by id, must be visible
+* `GET /types` - returns all doc types
 
-All `GET` verbs accept parameter `ields`, indication which fileds to return
+All `GET` verbs returning document accept parameter `fields`, indication which fileds to return
 
-* `POST /docs` - save new document
+* `POST /docs` - save new document, returns id
 * `PUT /docs/{id}` - update document
 
 #### References

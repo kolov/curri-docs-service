@@ -1,10 +1,8 @@
 import akka.actor.{Actor, ActorIdentity, ActorLogging, ActorPath, ActorSystem, Identify, Props}
 import akka.event.Logging
-import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives.{pathPrefix, _}
 import akka.http.scaladsl.server.ExceptionHandler
 import akka.stream.ActorMaterializer
@@ -12,7 +10,6 @@ import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
 import curri.http.{Api, AppErrors, HttpException}
-import reactivemongo.core.commands.LastError
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +30,7 @@ trait DocsService extends Config with Protocols {
   implicit val materializer = ActorMaterializer()
 
 
-  def saveDoc(user: String, maybeGroups: Option[Seq[String]], doc: CurriDocument): Future[HttpResponse] = {
+  def saveDoc(user: String, maybeGroups: Option[Seq[String]], doc: CurriDocument): Future[String] = {
     // if user or group are present in document, they must match the
     // user/groups from request
     doc.ownerUser match {
@@ -47,8 +44,7 @@ trait DocsService extends Config with Protocols {
         throw AppErrors.forbidden("Group in doc doesn't match groups in request")
       case None =>
     }
-    Repository.save(doc).map( le => HttpResponse(status = if(le.ok) StatusCodes.OK else StatusCodes
-      .InternalServerError))
+    Repository.save(doc)
   }
 
   def fetchDocs(user: String, maybeGroups: Option[Seq[String]], params: Map[String, String])
@@ -83,12 +79,6 @@ trait DocsService extends Config with Protocols {
                     val maybeGroups: Option[Seq[String]] = group.map(_.split(","))
                     pathEndOrSingleSlash {
                       get {
-                        path(Segment) { docId => {
-                          complete {
-                            fetchDoc(user, maybeGroups, docId, params)
-                          }
-                        }
-                        }
                         complete {
                           fetchDocs(user, maybeGroups, params)
                         }
@@ -100,7 +90,13 @@ trait DocsService extends Config with Protocols {
                         }
                         }
                       }
-                    }
+                    } ~
+                      path(Segment) { docId => {
+                        complete {
+                          fetchDoc(user, maybeGroups, docId, params)
+                        }
+                      }
+                      }
                   }
                   }
               }
