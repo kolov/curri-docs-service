@@ -1,14 +1,9 @@
-# Akka HTTP - MongoDB microservice 
+# Akka HTTP - MongoDB microservice     [![Build Status](https://travis-ci.org/kolov/curri-docs-service.svg?branch=master)](https://travis-ci.org/kolov/curri-docs-service)
 
 A service managing access to documents in a MongoDB database. This is one of the microservices used by
 https://github.com/kolov/curriculi.
 
 The implementation is based on akka-http and reactivemongo.
- 
-# Status
-
- [![Build Status](https://travis-ci.org/kolov/curri-docs-service.svg?branch=master)](https://travis-ci.org/kolov/curri-docs-service)
-
  
 ## API
 
