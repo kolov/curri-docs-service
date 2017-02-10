@@ -7,6 +7,7 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
+
 libraryDependencies ++= {
   val akkaV = "2.4.3"
   // val akkaV = "10.0.0"
@@ -34,3 +35,24 @@ resolvers += "Typesafe" at "https://repo.typesafe.com/typesafe/releases/"
 
 
 mainClass in(Compile, run) := Some("Boot")
+enablePlugins(sbtdocker.DockerPlugin)
+
+
+dockerfile in docker := {
+  // any vals to be declared here
+  new sbtdocker.mutable.Dockerfile {
+    from("frolvlad/alpine-oraclejdk8:slim")
+    volume("/app")
+    val artifact: File = assembly.value
+    val artifactTargetPath = s"/app/${artifact.name}"
+
+    add(artifact, artifactTargetPath)
+    entryPoint("java", "-jar", artifactTargetPath)
+  }
+}
+
+// from http://stackoverflow.com/questions/25144484/sbt-assembly-deduplication-found-error
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
