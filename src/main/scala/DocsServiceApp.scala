@@ -9,6 +9,7 @@ import akka.stream.ActorMaterializer
 import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
+import curri.eureka.EurekaClient
 import curri.http.{Api, AppErrors, HttpException}
 import spray.json.DefaultJsonProtocol
 
@@ -107,6 +108,8 @@ trait DocsService extends Config with Protocols {
 
 
 object DocsServiceApp extends App with DocsService with Config {
+
+  EurekaClient.register
 
   implicit val system = ActorSystem("Streams")
   implicit val materializer = ActorMaterializer()

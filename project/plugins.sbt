@@ -8,3 +8,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-aspectj" % "0.10.6")
 
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
 
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
+

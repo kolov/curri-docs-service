@@ -7,8 +7,7 @@ import curri.docs.domain.{CurriDocument, CurriDocumentWriter}
 import curri.http.HttpException
 import reactivemongo.api._
 import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONObjectID, BSONString}
-import reactivemongo.core.commands.LastError
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -10,7 +10,6 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= {
   val akkaV = "2.4.3"
-  // val akkaV = "10.0.0"
 
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV,
@@ -22,6 +21,7 @@ libraryDependencies ++= {
     "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
     "com.typesafe.play" % "play-json_2.11" % "2.4.0-M2",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
+    "com.netflix.eureka" % "eureka-client" % "1.4.12",
 
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
@@ -47,6 +47,7 @@ dockerfile in docker := {
     val artifactTargetPath = s"/app/${artifact.name}"
 
     add(artifact, artifactTargetPath)
+    expose(9000)
     entryPoint("java", "-jar", artifactTargetPath)
   }
 }
@@ -54,5 +55,6 @@ dockerfile in docker := {
 // from http://stackoverflow.com/questions/25144484/sbt-assembly-deduplication-found-error
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case PathList("reference.conf") => MergeStrategy.concat
   case x => MergeStrategy.first
 }
