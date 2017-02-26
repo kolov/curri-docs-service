@@ -24,7 +24,7 @@ libraryDependencies ++= {
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7",
 
 
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
   )
 }
@@ -38,11 +38,15 @@ resolvers += "Typesafe" at "https://repo.typesafe.com/typesafe/releases/"
 mainClass in(Compile, run) := Some("Boot")
 enablePlugins(sbtdocker.DockerPlugin)
 
+imageNames in docker := Seq(
+  // Sets the latest tag
+  ImageName("kolov/service-docs:" + version.value)
+)
 
 dockerfile in docker := {
   // any vals to be declared here
   new sbtdocker.mutable.Dockerfile {
-    from("frolvlad/alpine-oraclejdk8:slim")
+    from("kolov/java8")
     volume("/app")
     val artifact: File = assembly.value
     val artifactTargetPath = s"/app/${artifact.name}"
@@ -55,7 +59,14 @@ dockerfile in docker := {
 
 // from http://stackoverflow.com/questions/25144484/sbt-assembly-deduplication-found-error
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case PathList("reference.conf") => MergeStrategy.concat
   case x => MergeStrategy.first
+}
+
+
+val pushDockerLocalTask = TaskKey[Unit]("pushDockerLocal", "Pushes docker file to local repo")
+val pushDockerLocal = pushDockerLocalTask := {
+  import sys.process._
+  Seq("docker", "tag", "kolov/service-docs:" + version.value, "localhost:5000/kolov/service-docs:" + version.value) !
 }

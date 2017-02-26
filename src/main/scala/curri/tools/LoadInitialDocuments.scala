@@ -1,6 +1,7 @@
 package curri.tools
 
 import curri.Config
+import curri.db.Repository
 import curri.docs.domain.CurriDocument
 
 
@@ -15,6 +16,6 @@ object LoadInitialDocuments extends App with Config {
 
     val loader = new DocumentsLoader
     loader.initDocuments(docsFolder + "/xsd")
-
+    Repository.shutdown()
   }
 }

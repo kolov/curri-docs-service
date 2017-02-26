@@ -17,13 +17,16 @@ import scala.concurrent.Future
   */
 object Repository extends Config {
 
+  val driver = new MongoDriver
+  val connection = driver.connection(List(mongoHost))
   val collectionDocs = connect("docs")
 
+  def shutdown() = {
+    connection.close()
+    driver.close()
+  }
+
   def connect(name: String): BSONCollection = {
-
-    val driver = new MongoDriver
-    val connection = driver.connection(List(mongoHost))
-
     val db = connection(mongoDB)
     db.collection(name)
   }
@@ -37,7 +40,7 @@ object Repository extends Config {
   def findDoc(user: String, maybeGroups: Option[Seq[String]], id: String): Future[Option[BSONDocument]] = {
 
     collectionDocs
-       .find(makeDoc(user, maybeGroups).add(BSONDocument("_id" -> BSONObjectID(id))))
+      .find(makeDoc(user, maybeGroups).add(BSONDocument("_id" -> BSONObjectID(id))))
       //.find(BSONDocument("_id" -> BSONObjectID(id)))
       .cursor[BSONDocument]
       .collect[List]().map(_.headOption)
