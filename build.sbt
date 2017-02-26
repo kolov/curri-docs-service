@@ -21,9 +21,10 @@ libraryDependencies ++= {
     "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
     "com.typesafe.play" % "play-json_2.11" % "2.4.0-M2",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "com.netflix.eureka" % "eureka-client" % "1.4.12",
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7",
 
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
   )
 }
