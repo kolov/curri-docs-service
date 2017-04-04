@@ -1,42 +1,25 @@
-import com.typesafe.sbt.SbtAspectj._
+import sbt.Keys._
+import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 
-name := "curri-akka"
-organization := "curri"
-
-version := "1.0"
-
-scalaVersion := "2.11.8"
-
-
-libraryDependencies ++= {
-  val akkaV = "2.4.3"
-
-  Seq(
-    "com.typesafe.akka" %% "akka-actor" % akkaV,
-    "com.typesafe.akka" %% "akka-stream" % akkaV,
-    "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
-    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
-
-    "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23",
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
-    "com.typesafe.play" % "play-json_2.11" % "2.4.0-M2",
-    "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7",
+lazy val commonSettings = Seq(
+  name := "curri-akka",
+  organization := "curri",
+  version := "1.0",
+  scalaVersion := "2.11.8"
+)
 
 
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
-  )
-}
+
+
 Revolver.settings
 
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 resolvers += "Typesafe" at "https://repo.typesafe.com/typesafe/releases/"
 
-
-mainClass in(Compile, run) := Some("Boot")
+mainClass in(Compile, run) := Some("DocsServiceApp")
 enablePlugins(sbtdocker.DockerPlugin)
+enablePlugins(JavaAppPackaging)
 
 imageNames in docker := Seq(
   // Sets the latest tag
@@ -47,13 +30,16 @@ dockerfile in docker := {
   // any vals to be declared here
   new sbtdocker.mutable.Dockerfile {
     from("kolov/java8")
-    volume("/app")
-    val artifact: File = assembly.value
-    val artifactTargetPath = s"/app/${artifact.name}"
+    entryPoint("scripts/docs-service-app")
 
-    add(artifact, artifactTargetPath)
+    user("root")
+
+    add("target/universal/*.tgz", "/home/docker/app/")
+    run("chown", "-R", "docker:docker", ".")
+    println(artifact)
+
+    user("docker")
     expose(9000)
-    entryPoint("java", "-jar", artifactTargetPath)
   }
 }
 
@@ -65,8 +51,36 @@ assemblyMergeStrategy in assembly := {
 }
 
 
-val pushDockerLocalTask = TaskKey[Unit]("pushDockerLocal", "Pushes docker file to local repo")
-val pushDockerLocal = pushDockerLocalTask := {
+val pushDockerTask = TaskKey[Unit]("pushDocker", "Pushes docker file to local repo")
+pushDockerTask := {
   import sys.process._
-  Seq("docker", "tag", "kolov/service-docs:" + version.value, "localhost:5000/kolov/service-docs:" + version.value) !
+  val newVersion = "latest" //  or version.value
+  Seq("docker", "tag", "kolov/service-docs:" + version.value,
+    s"eu.gcr.io/iconic-setup-91510/curriculi-service-docs:$newVersion") !;
+  Seq("docker", "push", s"eu.gcr.io/iconic-setup-91510/curriculi-service-docs:$newVersion") !;
 }
+
+
+
+lazy val mainProject = (project in file("."))
+  .settings(commonSettings: _*)
+  .settings(libraryDependencies ++= {
+    val akkaV = "2.4.3"
+
+    Seq(
+      "com.typesafe.akka" %% "akka-actor" % akkaV,
+      "com.typesafe.akka" %% "akka-stream" % akkaV,
+      "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
+      "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
+
+      "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23",
+      "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
+      "com.typesafe.play" % "play-json_2.11" % "2.4.0-M2",
+      "ch.qos.logback" % "logback-classic" % "1.1.2",
+      "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7",
+
+
+      "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+      "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
+    )
+  })

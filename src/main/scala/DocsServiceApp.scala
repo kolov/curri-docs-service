@@ -117,7 +117,7 @@ object DocsServiceApp extends App with DocsService with Config {
 
   val logger = Logging(system, getClass)
 
-  Http().bindAndHandle(routes, "0.0.0.0", 9000)
+  Http().bindAndHandle(routes, "0.0.0.0", 8502)
 }
 
 class IDActor extends Actor with ActorLogging {
