@@ -1,13 +1,13 @@
 FROM kolov/java8:latest
-ENTRYPOINT ["scripts/docs-service-app"]
+ENTRYPOINT ["curri-akka-1.0/bin/docs-service-app"]
 
-USER docker
-USER root
+#RUN useradd docker
+#USER root
 
 WORKDIR /home/docker/app
 ADD target/universal/curri-*.tgz /home/docker/app/
-RUN ["chown", "-R", "docker:docker", "."]
+#RUN ["chown", "-R", "docker", "."]
 
-USER docker
+#USER docker
 
 EXPOSE 9000
