@@ -6,4 +6,5 @@ dependencies:
   override:
     - sbt universal:packageZipTarball
     - docker info
-    - docker build --rm=false -t kolov/docs-service .
+    - docker build --rm=false -t eu.gcr.io/iconic-setup-91510/curriculi-service-docs .
+    - docker push eu.gcr.io/iconic-setup-91510/curriculi-service-docs
