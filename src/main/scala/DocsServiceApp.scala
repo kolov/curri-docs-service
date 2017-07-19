@@ -23,32 +23,31 @@ trait Protocols extends DefaultJsonProtocol {
 trait DocsService extends Config with Protocols {
 
 
-
-  def saveDoc(user: String, maybeGroups: Option[Seq[String]], doc: CurriDocument): Future[String] = {
+  def saveDoc(user: String, groups: Seq[String], doc: CurriDocument): Future[String] = {
     // if user or group are present in document, they must match the
     // user/groups from request
-    doc.ownerUser match {
+    doc.user match {
       case Some(ownerUser) => if (ownerUser != user)
         throw AppErrors.forbidden("User in doc doesn't match user in " + "request")
-      case None => if (!doc.ownerGroup.isDefined)
+      case None => if (!doc.group.isDefined)
         throw AppErrors.badRequest("Either user or group must be defined in request")
     }
-    doc.ownerGroup match {
-      case Some(group) => if (!maybeGroups.getOrElse(List()).contains(group))
+    doc.group match {
+      case Some(group) => if (!groups.contains(group))
         throw AppErrors.forbidden("Group in doc doesn't match groups in request")
       case None =>
     }
     Repository.save(doc)
   }
 
-  def fetchDocs(user: String, maybeGroups: Option[Seq[String]], params: Map[String, String])
+  def fetchDocs(user: String, groups: Seq[String], params: Map[String, String])
   : Future[List[CurriDocument]] = {
-    Repository.findDocs(user, maybeGroups).map(l => l.map(CurriDocumentReader.read(_)))
+    Repository.findDocs(user, groups).map(l => l.map(CurriDocumentReader.read(_)))
   }
 
-  def fetchDoc(user: String, maybeGroups: Option[Seq[String]], id: String, params: Map[String, String])
+  def fetchDoc(user: String, groups: Seq[String], id: String, params: Map[String, String])
   : Future[CurriDocument] = {
-    Repository.findDoc(user, maybeGroups, id).map(_ match {
+    Repository.findDoc(user, groups, id).map(_ match {
       case Some(doc) => CurriDocumentReader.read(doc)
       case None => throw AppErrors.notFound
     })
@@ -72,17 +71,17 @@ trait DocsService extends Config with Protocols {
               maybeUser match {
                 case None => throw AppErrors.unauthorized
                 case Some(user) =>
-                  optionalHeaderValueByName(Api.HEADER_GROUPS) { group => {
-                    val maybeGroups: Option[Seq[String]] = group.map(_.split(","))
+                  optionalHeaderValueByName(Api.HEADER_GROUPS) { groupsHeader => {
+                    val groups: Seq[String] = groupsHeader.map(_.split(",").toList).getOrElse(Seq())
                     pathEndOrSingleSlash {
                       get {
                         complete {
-                          fetchDocs(user, maybeGroups, params)
+                          fetchDocs(user, groups, params)
                         }
                       } ~ post {
                         entity(as[CurriDocument]) { doc => {
                           complete {
-                            saveDoc(user, maybeGroups, doc) // eventual group will be part of doc request
+                            saveDoc(user, groups, doc) // eventual group will be part of doc request
                           }
                         }
                         }
@@ -90,7 +89,7 @@ trait DocsService extends Config with Protocols {
                     } ~
                       path(Segment) { docId => {
                         complete {
-                          fetchDoc(user, maybeGroups, docId, params)
+                          fetchDoc(user, groups, docId, params)
                         }
                       }
                       }
@@ -112,12 +111,12 @@ object DocsServiceApp extends App with DocsService with Config {
   implicit val materializer = ActorMaterializer()
 
   // helper actor for some logging
-  val idActor = system.actorOf(Props[IDActor], "idActor");
+  val idActor = system.actorOf(Props[IDActor], "idActor")
   idActor ! "start"
 
   val logger = Logging(system, getClass)
 
-  Http().bindAndHandle(routes, "0.0.0.0", 8502)
+  Http().bindAndHandle(routes, "0.0.0.0", httpPort)
 }
 
 class IDActor extends Actor with ActorLogging {

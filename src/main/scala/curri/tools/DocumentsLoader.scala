@@ -26,14 +26,14 @@ class DocumentsLoader {
     Repository.save(doc)
   }
 
-  def initDocuments(folder: String) = {
+  def saveAllDocuments(folder: String) = {
     readDocuments(folder).foreach(storeDocument)
   }
 
   def readDocuments(folder: String) = {
     val file = new File(folder)
     if (!file.isDirectory || !file.exists()) {
-      throw new IllegalArgumentException("No such filder " + folder)
+      throw new IllegalArgumentException("No such folder " + folder)
     }
     file.listFiles
       .filter(f => f.isFile & f.getName.endsWith(".json"))

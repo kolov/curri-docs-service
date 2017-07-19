@@ -10,12 +10,12 @@ object LoadInitialDocuments extends App with Config {
 
   override def main(args: Array[String]) = {
     val docsFolder = classOf[CurriDocument]
-      .getResource("/documents/docs.txt")
+      .getResource("/documents/resources-root")
       .getFile
-      .stripSuffix("/docs.txt")
+      .stripSuffix("/resources-root")
 
     val loader = new DocumentsLoader
-    loader.initDocuments(docsFolder + "/xsd")
+    loader.saveAllDocuments(docsFolder + "/xsd")
     Repository.shutdown()
   }
 }

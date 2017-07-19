@@ -8,9 +8,9 @@ case class CurriDocument(
                           @JsonProperty("title") title: String,
                           @JsonProperty("kind") kind: String,
                           @JsonProperty("body") body: String,
-                          @JsonProperty("ownerUser") ownerUser: Option[String],
-                          @JsonProperty("ownerGroup") ownerGroup: Option[String]) {
-  def withBody(newBody: String) = CurriDocument(title, kind, newBody, ownerUser, ownerGroup)
+                          @JsonProperty("user") user: Option[String],
+                          @JsonProperty("group") group: Option[String]) {
+  def withBody(newBody: String) = CurriDocument(title, kind, newBody, user, group)
 
 }
 
@@ -20,8 +20,8 @@ object CurriDocumentWriter extends BSONDocumentWriter[CurriDocument] {
     "title" -> curriDoc.title,
     "kind" -> curriDoc.kind,
     "body" -> curriDoc.body,
-    "ownerUser" -> curriDoc.ownerUser,
-    "ownerGroup" -> curriDoc.ownerGroup)
+    "user" -> curriDoc.user,
+    "group" -> curriDoc.group)
 }
 
 
@@ -31,7 +31,7 @@ object CurriDocumentReader extends BSONDocumentReader[CurriDocument] {
       doc.getAs[String]("title").get,
       doc.getAs[String]("kind").get,
       doc.getAs[String]("body").get,
-      doc.getAs[String]("ownerUser"),
-      doc.getAs[String]("ownerGroup"))
+      doc.getAs[String]("user"),
+      doc.getAs[String]("group"))
   }
 }

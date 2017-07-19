@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  app:
+    image: kolov/scala
+    environment:
+      MONGO_HOST: mongo
+    volumes:
+      - ${HOME}/.sbt:/home/scala/.sbt
+      - ${HOME}/.ivy2:/home/scala/.ivy2
+      - .:/home/scala/app
+    links:
+      - mongo
+    working_dir: /home/scala/app
+    ports:
+      - "9000"
+  mongo:
+    image: mongo:3.0
+    ports:
+      - "27017"
