@@ -10,6 +10,7 @@
         <Logger name="log4j.test.Log4jTest" level="trace">
             <AppenderRef ref="Console"/>
         </Logger>
+        <Logger name="reactivemongo.core" level="info"/>
         <Root level="trace">
             <AppenderRef ref="Console"/>
         </Root>

@@ -2,7 +2,7 @@ package curri.docs.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter}
- 
+
 
 case class CurriDocument(
                           @JsonProperty("title") title: String,
@@ -14,24 +14,26 @@ case class CurriDocument(
 
 }
 
+object CurriDocument {
 
-object CurriDocumentWriter extends BSONDocumentWriter[CurriDocument] {
-  def write(curriDoc: CurriDocument): BSONDocument = BSONDocument(
-    "title" -> curriDoc.title,
-    "kind" -> curriDoc.kind,
-    "body" -> curriDoc.body,
-    "user" -> curriDoc.user,
-    "group" -> curriDoc.group)
-}
+  implicit object CurriDocumentWriter extends BSONDocumentWriter[CurriDocument] {
+    def write(curriDoc: CurriDocument): BSONDocument = BSONDocument(
+      "title" -> curriDoc.title,
+      "kind" -> curriDoc.kind,
+      "body" -> curriDoc.body,
+      "user" -> curriDoc.user,
+      "group" -> curriDoc.group)
+  }
 
 
-object CurriDocumentReader extends BSONDocumentReader[CurriDocument] {
-  def read(doc: BSONDocument): CurriDocument = {
-    CurriDocument(
-      doc.getAs[String]("title").get,
-      doc.getAs[String]("kind").get,
-      doc.getAs[String]("body").get,
-      doc.getAs[String]("user"),
-      doc.getAs[String]("group"))
+  implicit object CurriDocumentReader extends BSONDocumentReader[CurriDocument] {
+    def read(doc: BSONDocument): CurriDocument = {
+      CurriDocument(
+        doc.getAs[String]("title").get,
+        doc.getAs[String]("kind").get,
+        doc.getAs[String]("body").get,
+        doc.getAs[String]("user"),
+        doc.getAs[String]("group"))
+    }
   }
 }

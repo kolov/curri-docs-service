@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.ExceptionHandler
 import akka.stream.ActorMaterializer
 import curri.Config
 import curri.db.Repository
-import curri.docs.domain.{CurriDocument, CurriDocumentReader}
+import curri.docs.domain.{CurriDocument}
 import curri.http.{Api, AppErrors, HttpException}
 import curri.tools.DbInitializer
 import spray.json.DefaultJsonProtocol
@@ -43,13 +43,13 @@ trait DocsService extends Config with Protocols {
 
   def fetchDocs(user: String, groups: Seq[String], params: Map[String, String])
   : Future[List[CurriDocument]] = {
-    Repository.findDocs(user, groups).map(l => l.map(CurriDocumentReader.read(_)))
+    Repository.findDocs(user, groups)
   }
 
   def fetchDoc(user: String, groups: Seq[String], id: String, params: Map[String, String])
   : Future[CurriDocument] = {
     Repository.findDoc(user, groups, id).map(_ match {
-      case Some(doc) => CurriDocumentReader.read(doc)
+      case Some(doc) => doc
       case None => throw AppErrors.notFound
     })
   }

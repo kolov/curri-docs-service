@@ -3,14 +3,16 @@ package curri.db
 
 import akka.http.scaladsl.model.StatusCodes
 import curri.Config
-import curri.docs.domain.{CurriDocument, CurriDocumentWriter}
+import curri.docs.domain.CurriDocument
+import curri.docs.domain.CurriDocument._
 import curri.http.HttpException
 import reactivemongo.api._
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 /**
   * Access to the Mongodb repository
@@ -34,22 +36,21 @@ object Repository extends Config {
     db.collection(name)
   }
 
-  def findDocs(user: String, groups: Seq[String]): Future[List[BSONDocument]] = {
-    val docsByUser: Future[List[BSONDocument]] = collectionDocs.find(BSONDocument("user" -> user)).cursor[BSONDocument].collect[List]()
-    val docsByGroup: Future[List[BSONDocument]] = collectionDocs.find(
-      // BSONDocument("user" -> None) ++
-//      BSONDocument("group" -> BSONDocument("$in" -> groups))).cursor[BSONDocument].collect[List]()
-      BSONDocument("group" -> "all")).cursor[BSONDocument]().collect[List]()
+  def findDocs(user: String, groups: Seq[String]): Future[List[CurriDocument]] = {
+    val docsByUser = collectionDocs.find(
+      BSONDocument("user" -> user)).cursor[CurriDocument]().collect[List]()
+    val docsByGroup = collectionDocs.find(
+      BSONDocument("group" -> "all")).cursor[CurriDocument]().collect[List]()
 
-    Future.fold(List(docsByUser, docsByUser))(List[BSONDocument]())(_ ++ _)
+    Future.fold(List(docsByUser, docsByGroup))(List[CurriDocument]())(_ ++ _)
   }
 
-  def findDoc(user: String, groups: Seq[String], id: String): Future[Option[BSONDocument]] = {
+  def findDoc(user: String, groups: Seq[String], id: String): Future[Option[CurriDocument]] = {
     collectionDocs
-      .find(BSONDocument("_id" -> BSONObjectID(id))).one[BSONDocument]
+      .find(BSONDocument("_id" -> BSONObjectID(id))).one[CurriDocument]
   }
 
-  def hasDocs() : Future[Boolean] = {
+  def hasDocs(): Future[Boolean] = {
     collectionDocs
       .find(BSONDocument())
       .cursor[BSONDocument]()
