@@ -1,14 +1,21 @@
 package curri.tools
 
-import curri.Config
 import curri.db.Repository
 import curri.docs.domain.CurriDocument
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-object LoadInitialDocuments extends App with Config {
+object DbInitializer {
 
+  def migrate() = {
+    for {
+      hasDocs <- Repository.hasDocs()
+      done <- if (!hasDocs) insertInitialDocuments() else Future {}
+    } yield (hasDocs, done)
+  }
 
-  override def main(args: Array[String]) = {
+  private def insertInitialDocuments() = {
     val docsFolder = classOf[CurriDocument]
       .getResource("/documents/resources-root")
       .getFile
@@ -16,6 +23,5 @@ object LoadInitialDocuments extends App with Config {
 
     val loader = new DocumentsLoader
     loader.saveAllDocuments(docsFolder + "/xsd")
-    Repository.shutdown()
   }
 }

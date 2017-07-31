@@ -10,6 +10,7 @@ import curri.Config
 import curri.db.Repository
 import curri.docs.domain.{CurriDocument, CurriDocumentReader}
 import curri.http.{Api, AppErrors, HttpException}
+import curri.tools.DbInitializer
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -67,8 +68,8 @@ trait DocsService extends Config with Protocols {
       handleExceptions(exceptionHandler) {
         pathPrefix("docs") {
           parameterMap { params =>
-            optionalHeaderValueByName(Api.HEADER_USER) { maybeUser =>
-              maybeUser match {
+            optionalHeaderValueByName(Api.HEADER_USER) { user =>
+              user match {
                 case None => throw AppErrors.unauthorized
                 case Some(user) =>
                   optionalHeaderValueByName(Api.HEADER_GROUPS) { groupsHeader => {
@@ -116,7 +117,10 @@ object DocsServiceApp extends App with DocsService with Config {
 
   val logger = Logging(system, getClass)
 
-  Http().bindAndHandle(routes, "0.0.0.0", httpPort)
+  for {
+    (hasDocs, done) <- DbInitializer.migrate()
+    _ <- Http().bindAndHandle(routes, "0.0.0.0", httpPort)
+  } yield ()
 }
 
 class IDActor extends Actor with ActorLogging {

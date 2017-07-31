@@ -39,18 +39,21 @@ object Repository extends Config {
     val docsByGroup: Future[List[BSONDocument]] = collectionDocs.find(
       // BSONDocument("user" -> None) ++
 //      BSONDocument("group" -> BSONDocument("$in" -> groups))).cursor[BSONDocument].collect[List]()
-      BSONDocument("group" -> "all")).cursor[BSONDocument].collect[List]()
+      BSONDocument("group" -> "all")).cursor[BSONDocument]().collect[List]()
 
     Future.fold(List(docsByUser, docsByUser))(List[BSONDocument]())(_ ++ _)
   }
 
   def findDoc(user: String, groups: Seq[String], id: String): Future[Option[BSONDocument]] = {
-
     collectionDocs
-      .find(BSONDocument("_id" -> BSONObjectID(id)))
-      // check id/group
-      .cursor[BSONDocument]
-      .collect[List]().map(_.headOption)
+      .find(BSONDocument("_id" -> BSONObjectID(id))).one[BSONDocument]
+  }
+
+  def hasDocs() : Future[Boolean] = {
+    collectionDocs
+      .find(BSONDocument())
+      .cursor[BSONDocument]()
+      .collect[List](1).map(!_.isEmpty)
   }
 
 

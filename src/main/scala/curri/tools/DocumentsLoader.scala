@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.OptionModule
 import curri.db.Repository
 import curri.docs.domain.CurriDocument
+import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.Future
 import scala.io.Source
 
 class DocumentsLoader {
@@ -22,15 +24,19 @@ class DocumentsLoader {
     readDoc.withBody(content)
   }
 
-  def storeDocument(doc: CurriDocument) = {
+  def storeDocument(doc: CurriDocument) : Future[String]= {
     Repository.save(doc)
   }
 
   def saveAllDocuments(folder: String) = {
-    readDocuments(folder).foreach(storeDocument)
+     Future.sequence(readDocuments(folder).map(storeDocument))
   }
 
-  def readDocuments(folder: String) = {
+  def documentsPresent = {
+    Repository.hasDocs()
+  }
+
+  def readDocuments(folder: String) : Seq[CurriDocument] = {
     val file = new File(folder)
     if (!file.isDirectory || !file.exists()) {
       throw new IllegalArgumentException("No such folder " + folder)
