@@ -4,8 +4,10 @@ machine:
 
 dependencies:
   override:
+    - aws --version
+    - aws configure set default.region eu-central-1
+    - aws configure set default.output json
     - aws ecr get-login --region eu-central-1
-    - aws ecr get-login --region us-east-1
     - sbt universal:packageZipTarball
     - docker info
     - docker login -e 1234@5678.com -u oauth2accesstoken -p $GCLOUD_ACCESS_TOKEN https://eu.gcr.io
