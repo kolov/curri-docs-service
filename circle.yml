@@ -11,5 +11,5 @@ dependencies:
   override:
     - sbt universal:packageZipTarball
     - wget https://raw.githubusercontent.com/kolov/k8s-stuff/master/circleci/deploy-aws.sh
-    - chmod +x deploy.sh
-    - ./deploy.sh
+    - chmod +x deploy-aws.sh
+    - ./deploy-aws.sh
