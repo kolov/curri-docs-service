@@ -4,8 +4,11 @@ machine:
 
 dependencies:
   override:
+    - aws ecr get-login --region eu-central-1
+    - aws ecr get-login --region us-east-1
     - sbt universal:packageZipTarball
     - docker info
     - docker login -e 1234@5678.com -u oauth2accesstoken -p $GCLOUD_ACCESS_TOKEN https://eu.gcr.io
     - docker build --rm=false -t eu.gcr.io/iconic-setup-91510/curriculi-service-docs .
     - docker push eu.gcr.io/iconic-setup-91510/curriculi-service-docs
+
