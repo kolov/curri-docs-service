@@ -3,6 +3,9 @@ machine:
     - docker
 
 dependencies:
+  cache_directories:
+      - "~/.ivy2"
+      - "~/.sbt"
   override:
     - aws --version
     - aws configure set default.region eu-central-1
