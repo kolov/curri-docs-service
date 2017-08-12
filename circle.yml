@@ -4,13 +4,12 @@ machine:
 
 dependencies:
   override:
-    - echo $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com//curriculi-service-docs:$CIRCLE_SHA1
     - aws --version
     - aws configure set default.region eu-central-1
     - aws configure set default.output json
     - eval $(aws ecr get-login --region eu-central-1)
     - sbt universal:packageZipTarball
     - docker info
-    - docker build --rm=false -t $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com//curriculi-service-docs:$CIRCLE_SHA1 .
-    - docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com//curriculi-service-docs:$CIRCLE_SHA1
+    - docker build --rm=false -t $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/curriculi-service-docs:$CIRCLE_SHA1 .
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/curriculi-service-docs:$CIRCLE_SHA1
 
