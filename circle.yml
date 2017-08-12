@@ -4,6 +4,7 @@ machine:
 
 dependencies:
   override:
+    - echo $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com//curriculi-service-docs:$CIRCLE_SHA1
     - aws --version
     - aws configure set default.region eu-central-1
     - aws configure set default.output json
