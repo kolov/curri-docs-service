@@ -7,12 +7,12 @@ dependencies:
       - "~/.ivy2"
       - "~/.sbt"
   override:
-    - aws --version
+    - sed s/%VERSION%/$CIRCLE_SHA1/g k8s-deployment.yml > k8s-deployment-latest.yml
+    - kubectl apply -f k8s-deployment-latest.yml
+    - sbt universal:packageZipTarball
     - aws configure set default.region eu-central-1
     - aws configure set default.output json
     - eval $(aws ecr get-login --region eu-central-1)
-    - sbt universal:packageZipTarball
-    - docker info
     - docker build --rm=false -t $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/curriculi-service-docs:$CIRCLE_SHA1 .
     - docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/curriculi-service-docs:$CIRCLE_SHA1
 
