@@ -3,7 +3,7 @@ machine:
     - docker
   environment:
     APP_NAME: curriculi-docs-service
-    BUILD_TARGET: .
+    BUILD_TARGET_DIR: .
 
 dependencies:
   cache_directories:
