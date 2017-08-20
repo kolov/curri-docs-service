@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: curri-docs-service
-        image: $REPOSITORY%/%APP_NAME%:%VERSION%
+        image: %REGISTRY%/%APP_NAME%:%VERSION%
         ports:
         - containerPort: 9000
