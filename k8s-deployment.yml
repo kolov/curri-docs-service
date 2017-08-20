@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: curri-docs-service
-        image: eu.gcr.io/iconic-setup-91510/curri-docs-service:%VERSION%
+        image: $REPOSITORY%/%APP_NAME%:%VERSION%
         ports:
         - containerPort: 9000
