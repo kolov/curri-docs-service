@@ -18,9 +18,9 @@ variables:
 
 job-build:
   stage: build
-  image: java:openjdk-8
+  image: hseeberger/scala-sbt
   script:
-    - ./gradlew build
+    - sbt test packageZipTarball
   only:
     - master
   tags:
