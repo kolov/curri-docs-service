@@ -34,7 +34,7 @@ job-publish:
   stage: publish
   image: docker:dind
   script:
-    - docker build -t $REGISTRY/$APP_NAME:$CI_COMMIT_SHA build/libs
+    - docker build -t $REGISTRY/$APP_NAME:$CI_COMMIT_SHA .
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker push $REGISTRY/$APP_NAME:$CI_COMMIT_SHA
   only:
