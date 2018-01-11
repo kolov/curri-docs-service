@@ -1,22 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: curri-users
+  name: curri-docs
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: curri-users
+        app: curri-docs
     spec:
       containers:
-      - name: curri-users
+      - name: curri-docs
         image: %REGISTRY%/%APP_NAME%:%VERSION%
         ports:
         - containerPort: 9000
-        env:
-        - name: MONGO_USERS_SERVICE_HOST
-          value: "mongo-users"
       tolerations:
       - operator: "Exists"
       imagePullSecrets:
