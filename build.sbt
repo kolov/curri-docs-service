@@ -2,7 +2,7 @@ import sbt.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 
 lazy val commonSettings = Seq(
-  name := "curri-akka",
+  name := "curri-docs",
   organization := "curri",
   version := "1.0",
   scalaVersion := "2.11.8"
