@@ -1,0 +1,61 @@
+
+services:
+  - docker:dind
+
+before_script:
+
+after_script:
+
+stages:
+  - build
+  - publish
+  - test
+  - deploy
+
+variables:
+  REGISTRY: registry.gitlab.com/kolov
+  APP_NAME: curri-users
+
+job-build:
+  stage: build
+  image: java:openjdk-8
+  script:
+    - ./gradlew build
+  only:
+    - master
+  tags:
+    - docker
+  cache:
+    paths:
+      - build
+      - ~/.m2
+
+job-publish:
+  stage: publish
+  image: docker:dind
+  script:
+    - docker build -t $REGISTRY/$APP_NAME:$CI_COMMIT_SHA build/libs
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker push $REGISTRY/$APP_NAME:$CI_COMMIT_SHA
+  only:
+    - master
+  tags:
+    - docker
+  cache:
+    paths:
+      - dist
+
+job-deploy:
+  stage: deploy
+  image: kolov/aws-cli
+  script:
+    - mkdir ~/.kube
+    - echo $KUBE_CONFIG | base64 --decode  >  ~/.kube/config
+    - kubectl get nodes
+    - sed -e s@%VERSION%@$CI_COMMIT_SHA@g -e s@%APP_NAME%@$APP_NAME@g -e s@%REGISTRY%@$REGISTRY@g k8s/k8s-deployment.yml > k8s-deployment-latest.yml
+    - kubectl apply -f k8s-deployment-latest.yml
+    - kubectl apply -f k8s/k8s-service.yml
+  only:
+    - master
+  tags:
+    - docker
