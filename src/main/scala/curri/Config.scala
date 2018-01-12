@@ -11,6 +11,6 @@ trait Config {
   val httpPort = httpConfig.getInt("port")
 
 
-  val mongoHost = if (mongoConfig.hasPath("host")) mongoConfig.getString("host") else "localhost"
+  val mongoHost = mongoConfig.getString("host")
   val mongoDB = mongoConfig.getString("db")
 }

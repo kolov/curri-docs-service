@@ -16,7 +16,7 @@ spec:
         - containerPort: 9000
         env:
         - name: MONGODB_HOST
-          value: "mongo-users"
+          value: mongo-users
       tolerations:
       - operator: "Exists"
       imagePullSecrets:
