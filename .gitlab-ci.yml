@@ -29,6 +29,7 @@ job-build:
     paths:
       - build
       - ~/.m2
+      - ~/.ivy2
 
 job-publish:
   stage: publish
@@ -44,7 +45,7 @@ job-publish:
     - docker
   cache:
     paths:
-      - dist
+      - target
 
 job-deploy:
   stage: deploy
