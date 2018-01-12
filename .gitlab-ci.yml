@@ -21,13 +21,14 @@ job-build:
   image: hseeberger/scala-sbt
   script:
     - sbt test universal:packageZipTarball
+    - ls -al ~
   only:
     - master
   tags:
     - docker
   cache:
     paths:
-      - build
+      - target
       - ~/.m2
       - ~/.ivy2
 
