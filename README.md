@@ -1,7 +1,7 @@
 # Akka HTTP - MongoDB microservice     [![Build Status](https://travis-ci.org/kolov/curri-docs-service.svg?branch=master)](https://travis-ci.org/kolov/curri-docs-service)
 
 A service managing access to documents in a MongoDB database. This is one of the microservices used by
-https://github.com/kolov/curriculi.
+the curriculi project.
 
 The implementation is based on akka-http and reactivemongo.
  
@@ -21,10 +21,12 @@ All `GET` verbs returning document accept parameter `fields`, indication which f
 
 ## References
 
-I have used the following resources to get started:
+This is one of my first Scala projects, I used these resources to get started:
 
 * https://github.com/ArchDev/akka-http-rest
 * http://www.lightbend.com/activator/template/akka-http-microservice
 * http://www.smartjava.org/content/building-rest-service-scala-akka-http-akka-streams-and-reactive-mongo
+
+After thet removed Play and addusedd circe for json.
 
 For licensing info see LICENSE file in project's root directory.

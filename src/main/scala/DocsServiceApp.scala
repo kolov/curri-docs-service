@@ -1,7 +1,6 @@
 import akka.actor.{Actor, ActorIdentity, ActorLogging, ActorPath, ActorSystem, Identify, Props}
 import akka.event.Logging
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives.{pathPrefix, _}
 import akka.http.scaladsl.server.ExceptionHandler
@@ -11,17 +10,14 @@ import curri.db.Repository
 import curri.docs.domain.{CurriDocument}
 import curri.http.{Api, AppErrors, HttpException}
 import curri.tools.DbInitializer
-import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import io.circe.generic.auto._
+import io.circe.java8.time._
 
-
-trait Protocols extends DefaultJsonProtocol {
-  implicit val ipDocFormat = jsonFormat5(CurriDocument.apply)
-}
-
-trait DocsService extends Config with Protocols {
+trait DocsService extends Config   {
 
 
   def saveDoc(user: String, groups: Seq[String], doc: CurriDocument): Future[String] = {

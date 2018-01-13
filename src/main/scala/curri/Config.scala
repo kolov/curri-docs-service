@@ -10,7 +10,6 @@ trait Config {
   val httpHost = httpConfig.getString("interface")
   val httpPort = httpConfig.getInt("port")
 
-
   val mongoHost = mongoConfig.getString("host")
   val mongoDB = mongoConfig.getString("db")
 }

@@ -60,13 +60,13 @@ object Repository extends Config {
 
   // return the saved document which will have an id
   def save(curriDocument: CurriDocument): Future[String] = {
-    val doc = CurriDocumentWriter.write(curriDocument)
+    val doc = bsonCodec.write(curriDocument)
     val id = BSONObjectID.generate
     collectionDocs.insert(doc.add(BSONDocument("_id" -> id)))
       .map(lastFailure => if (lastFailure.ok) {
         id.stringify
       } else {
-        throw new HttpException(StatusCodes.InternalServerError, lastFailure.message)
+        throw new HttpException(StatusCodes.InternalServerError, lastFailure.toString)
       })
 
   }

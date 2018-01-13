@@ -1,24 +1,12 @@
 package curri
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import play.api.libs.json.Json
 import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Utils {
-
-
-//  def convertToString(input: List[BSONDocument]): String = {
-//    input
-//      .map(f => convertToString(f))
-//      .mkString("[", ",", "]")
-//  }
-//
-//  def convertToString(input: BSONDocument): String = {
-//    Json.stringify(BSONFormats.toJSON(input))
-//  }
 
   object Responses {
     val NOT_FOUND = Future[HttpResponse] {

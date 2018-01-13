@@ -2,26 +2,26 @@ package curri.tools
 
 import java.io.File
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.OptionModule
 import curri.db.Repository
 import curri.docs.domain.CurriDocument
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.Source
+import io.circe.generic.auto._
+import io.circe.java8.time._
+import io.circe._
+import io.circe.parser.{decode, _}
 
 class DocumentsLoader {
 
-  val jsonMapper = new ObjectMapper()
-  val module = new OptionModule {}
-  jsonMapper.registerModule(module)
-
-  def readDocument(folder: String, baseName: String): CurriDocument = {
+  def readDocument(folder: String, baseName: String): Either[Error, CurriDocument] = {
     val json = Source.fromFile(new File(folder + "/" + baseName + ".json")).mkString
-    val readDoc = jsonMapper.readValue(json, classOf[CurriDocument])
-    val content = Source.fromFile(new File(folder + "/" + baseName + "." + readDoc.kind)).mkString
-    readDoc.withBody(content)
+    for {
+      readDoc <- decode[CurriDocument](json)
+      content = Source.fromFile(new File(folder + "/" + baseName + "." + readDoc.kind)).mkString
+      doc = readDoc.withBody(content)
+    } yield doc
   }
 
   def storeDocument(doc: CurriDocument) : Future[String]= {
@@ -46,6 +46,7 @@ class DocumentsLoader {
       .map(_.getName)
       .map(n => n.substring(0, n.length - ".json".length))
       .map(readDocument(folder, _))
+      .map( _.fold( e => throw new Exception(e.toString), d => d))
   }
 
 }
